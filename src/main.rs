@@ -3,7 +3,7 @@ use std::fmt::{self, Debug};
 use std::hash::Hash;
 use std::hash::Hasher;
 // use std::iter::Sum;
-use std::ops::{self, Add};
+use std::ops::{self, Add, Sub};
 use std::{cell::RefCell, rc::Rc};
 use uuid::Uuid;
 
@@ -119,10 +119,27 @@ impl Add for Value {
     }
 }
 
+impl Sub for Value {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data - other.borrow().data);
+
+        new_value.prev = vec![self, other];
+        new_value.op = Some(String::from("-"));
+        new_value.backward = Some(|value: &ValueData| {
+            value.prev[0].borrow_mut().grad += value.grad;
+            value.prev[1].borrow_mut().grad -= value.grad;
+        });
+
+        Value::new(new_value)
+    }
+}
+
 fn main() {
     let a = Value::from(3.0);
     let b = Value::from(4.0);
-    let c = a + b;
+    let c = a - b;
     println!("{:#?}", *c);
 
     c.backward();
