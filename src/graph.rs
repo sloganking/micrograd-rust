@@ -50,7 +50,6 @@ fn value_to_graph(value: &Value) -> DiGraph<String, String> {
 }
 
 pub fn create_graphviz(g: &Value, filename: &str) {
-    g.backward();
     let graph = value_to_graph(&g);
     let mut dot = format!("{:?}", Dot::new(&graph));
 
