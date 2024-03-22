@@ -1,16 +1,23 @@
+use std::collections::HashSet;
 use std::fmt::{self, Debug};
-use std::iter::Sum;
+use std::hash::Hash;
+use std::hash::Hasher;
+// use std::iter::Sum;
 use std::ops::{self, Add};
 use std::{cell::RefCell, rc::Rc};
+use uuid::Uuid;
 
 fn main() {
     println!("Hello, world!");
 
+    #[derive(Debug)]
     pub struct ValueData {
         data: f64,
         grad: f64,
         backward: Option<fn(value: &ValueData)>,
         prev: Vec<Value>,
+        op: Option<String>,
+        uuid: Uuid,
     }
 
     impl ValueData {
@@ -20,14 +27,13 @@ fn main() {
                 grad: 0.0,
                 backward: None,
                 prev: Vec::new(),
-                // uuid: Uuid::new_v4(),
-                // _backward: None,
-                // _prev: Vec::new(),
-                // _op: None,
+                op: None,
+                uuid: Uuid::new_v4(),
             }
         }
     }
 
+    #[derive(Clone)]
     pub struct Value(Rc<RefCell<ValueData>>);
 
     // Lets us do `value.borrow().data` instead of `value.0.borrow().data`
@@ -38,9 +44,51 @@ fn main() {
         }
     }
 
+    impl PartialEq for Value {
+        fn eq(&self, other: &Self) -> bool {
+            self.borrow().uuid == other.borrow().uuid
+        }
+    }
+
+    impl Eq for Value {}
+
+    impl Hash for Value {
+        fn hash<H: Hasher>(&self, state: &mut H) {
+            self.borrow().uuid.hash(state);
+        }
+    }
+
     impl Value {
         fn new(value: ValueData) -> Value {
             Value(Rc::new(RefCell::new(value)))
+        }
+
+        pub fn backward(&self) {
+            let topo = self.build_topo();
+
+            self.borrow_mut().grad = 1.0;
+            for v in topo {
+                if let Some(backprop) = v.borrow().backward {
+                    backprop(&v.borrow());
+                }
+            }
+        }
+
+        fn build_topo(&self) -> Vec<Value> {
+            let mut topo: Vec<Value> = vec![];
+            let mut visited: HashSet<Value> = HashSet::new();
+            self._build_topo(&mut topo, &mut visited);
+            topo.reverse();
+            topo
+        }
+
+        fn _build_topo(&self, topo: &mut Vec<Value>, visited: &mut HashSet<Value>) {
+            if visited.insert(self.clone()) {
+                self.borrow().prev.iter().for_each(|child| {
+                    child._build_topo(topo, visited);
+                });
+                topo.push(self.clone());
+            }
         }
     }
 
@@ -63,25 +111,23 @@ fn main() {
         fn add(self, other: Self) -> Self {
             let mut new_value = ValueData::new(self.borrow().data + other.borrow().data);
 
-            // new_value.backward = Some(|value: &ValueData| {
-            //     value.prev[0].backward(value.grad);
-            //     value.prev[1].backward(value.grad);
-            // });
-            new_value.prev.push(self);
-            new_value.prev.push(other);
+            new_value.prev = vec![self, other];
+            new_value.op = Some(String::from("+"));
+            new_value.backward = Some(|value: &ValueData| {
+                value.prev[0].borrow_mut().grad += value.grad;
+                value.prev[1].borrow_mut().grad += value.grad;
+            });
+
             Value::new(new_value)
         }
     }
 
-    // impl Sum for Value {
-    //     fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
-    //         let first = iter.next().expect("must contain at least one Value");
-    //         iter.fold(first, |acc, val| acc + val)
-    //     }
-    // }
-
     let a = Value::from(3.0);
     let b = Value::from(4.0);
     let c = a + b;
-    println!("{:?}", c);
+    println!("{:#?}", *c);
+
+    c.backward();
+
+    println!("{:#?}", *c);
 }
