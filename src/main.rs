@@ -187,9 +187,6 @@ fn main() {
     let dir = "test.dot";
     graph::create_graphviz(&d, dir);
 
-    // dot -Tpng -ograph.png graph.dot
-    // invoke shell:
-
     // can be "png" or "svg".
     let output_file_type = "png";
 
