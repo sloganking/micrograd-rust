@@ -21,12 +21,29 @@ fn value_to_graph_recursive(
         return node_index;
     }
 
-    let node_index = graph.add_node(format!(
+    let data_node_index = graph.add_node(format!(
         "data={:.1} grad={:.1}",
         value.borrow().data,
         value.borrow().grad
     ));
-    node_map.insert(uuid, node_index);
+    node_map.insert(uuid, data_node_index);
+
+    let node_index = if let Some(op) = &value.borrow().op {
+        // add op label node
+        // let uuid = Uuid::new_v4();
+        let label_node_index = graph.add_node(format!("{}", op));
+        // node_map.insert(uuid, label_node_index);
+
+        graph.add_edge(
+            label_node_index,
+            data_node_index,
+            value.borrow().op.clone().unwrap_or_default(),
+        );
+
+        label_node_index
+    } else {
+        data_node_index
+    };
 
     for prev_value in value.borrow().prev.iter() {
         let prev_node_index = value_to_graph_recursive(prev_value, graph, node_map);
@@ -37,7 +54,8 @@ fn value_to_graph_recursive(
         );
     }
 
-    node_index
+    // node_index
+    data_node_index
 }
 
 fn value_to_graph(value: &Value) -> DiGraph<String, String> {
