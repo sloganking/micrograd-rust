@@ -3,7 +3,7 @@ use std::fmt::{self, Debug};
 use std::hash::Hash;
 use std::hash::Hasher;
 // use std::iter::Sum;
-use std::ops::{self, Add, Sub};
+use std::ops::{self, Add, Div, Mul, Sub};
 use std::{cell::RefCell, rc::Rc};
 use uuid::Uuid;
 
@@ -130,6 +130,41 @@ impl Sub for Value {
         new_value.backward = Some(|value: &ValueData| {
             value.prev[0].borrow_mut().grad += value.grad;
             value.prev[1].borrow_mut().grad -= value.grad;
+        });
+
+        Value::new(new_value)
+    }
+}
+
+impl Mul for Value {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data * other.borrow().data);
+
+        new_value.prev = vec![self, other];
+        new_value.op = Some(String::from("*"));
+        new_value.backward = Some(|value: &ValueData| {
+            value.prev[0].borrow_mut().grad += value.grad * value.prev[1].borrow().data;
+            value.prev[1].borrow_mut().grad += value.grad * value.prev[0].borrow().data;
+        });
+
+        Value::new(new_value)
+    }
+}
+
+impl Div for Value {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data / other.borrow().data);
+
+        new_value.prev = vec![self, other];
+        new_value.op = Some(String::from("/"));
+        new_value.backward = Some(|value: &ValueData| {
+            value.prev[0].borrow_mut().grad += value.grad / value.prev[1].borrow().data;
+            value.prev[1].borrow_mut().grad +=
+                value.grad * value.prev[0].borrow().data / value.prev[1].borrow().data.powi(2);
         });
 
         Value::new(new_value)
