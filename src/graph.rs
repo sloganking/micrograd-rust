@@ -28,12 +28,11 @@ fn value_to_graph_recursive(
     ));
     node_map.insert(uuid, data_node_index);
 
-    let node_index = if let Some(op) = &value.borrow().op {
+    let node_index_that_prevs_point_to = if let Some(op) = &value.borrow().op {
         // add op label node
-        // let uuid = Uuid::new_v4();
         let label_node_index = graph.add_node(format!("{}", op));
-        // node_map.insert(uuid, label_node_index);
 
+        // add edge from label to data node
         graph.add_edge(
             label_node_index,
             data_node_index,
@@ -46,15 +45,14 @@ fn value_to_graph_recursive(
     };
 
     for prev_value in value.borrow().prev.iter() {
-        let prev_node_index = value_to_graph_recursive(prev_value, graph, node_map);
+        let prev_data_node_index = value_to_graph_recursive(prev_value, graph, node_map);
         graph.add_edge(
-            prev_node_index,
-            node_index,
+            prev_data_node_index,
+            node_index_that_prevs_point_to,
             value.borrow().op.clone().unwrap_or_default(),
         );
     }
 
-    // node_index
     data_node_index
 }
 
