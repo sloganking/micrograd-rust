@@ -33,11 +33,7 @@ fn value_to_graph_recursive(
         let label_node_index = graph.add_node(format!("{}", op));
 
         // add edge from label to data node
-        graph.add_edge(
-            label_node_index,
-            data_node_index,
-            value.borrow().op.clone().unwrap_or_default(),
-        );
+        graph.add_edge(label_node_index, data_node_index, "".to_owned());
 
         label_node_index
     } else {
@@ -49,7 +45,7 @@ fn value_to_graph_recursive(
         graph.add_edge(
             prev_data_node_index,
             node_index_that_prevs_point_to,
-            value.borrow().op.clone().unwrap_or_default(),
+            "".to_owned(),
         );
     }
 
