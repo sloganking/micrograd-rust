@@ -61,7 +61,8 @@ impl Value {
     }
 
     pub fn backward(&self) {
-        let topo = self.build_topo();
+        let mut topo = self.build_topo();
+        topo.reverse();
 
         self.borrow_mut().grad = 1.0;
         for v in topo {
@@ -75,7 +76,6 @@ impl Value {
         let mut topo: Vec<Value> = vec![];
         let mut visited: HashSet<Value> = HashSet::new();
         self._build_topo(&mut topo, &mut visited);
-        topo.reverse();
         topo
     }
 
