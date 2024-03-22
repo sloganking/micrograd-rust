@@ -185,7 +185,7 @@ fn main() {
     println!("{:#?}", *d);
 
     let dir = "test.dot";
-    graph::create_graphviz(&d, "test.dot");
+    graph::create_graphviz(&d, dir);
 
     // dot -Tpng -ograph.png graph.dot
     // invoke shell:
