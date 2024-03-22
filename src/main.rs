@@ -7,6 +7,8 @@ use std::ops::{self, Add, Div, Mul, Sub};
 use std::{cell::RefCell, rc::Rc};
 use uuid::Uuid;
 
+mod graph;
+
 #[derive(Debug)]
 pub struct ValueData {
     data: f64,
@@ -174,10 +176,25 @@ impl Div for Value {
 fn main() {
     let a = Value::from(3.0);
     let b = Value::from(4.0);
-    let c = a - b;
-    println!("{:#?}", *c);
+    let c = Value::from(5.0);
+    let d = a - b * c;
+    println!("{:#?}", *d);
 
-    c.backward();
+    d.backward();
 
-    println!("{:#?}", *c);
+    println!("{:#?}", *d);
+
+    let dir = "test.dot";
+    graph::create_graphviz(&d, "test.dot");
+
+    // dot -Tpng -ograph.png graph.dot
+    // invoke shell:
+
+    let output = std::process::Command::new("dot")
+        .arg("-Tpng")
+        .arg("-o")
+        .arg("graph.png")
+        .arg(dir)
+        .output()
+        .expect("failed to execute process");
 }
