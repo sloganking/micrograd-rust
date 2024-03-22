@@ -177,7 +177,7 @@ fn main() {
     let a = Value::from(3.0);
     let b = Value::from(4.0);
     let c = Value::from(5.0);
-    let d = a - b * c;
+    let d = (a - b) * c;
     println!("{:#?}", *d);
 
     d.backward();
@@ -190,11 +190,17 @@ fn main() {
     // dot -Tpng -ograph.png graph.dot
     // invoke shell:
 
-    let output = std::process::Command::new("dot")
-        .arg("-Tpng")
+    // can be "png" or "svg".
+    let output_file_type = "png";
+
+    if std::process::Command::new("dot")
+        .arg(format!("-T{}", output_file_type))
         .arg("-o")
-        .arg("graph.png")
+        .arg(format!("graph.{}", output_file_type))
         .arg(dir)
         .output()
-        .expect("failed to execute process");
+        .is_err()
+    {
+        println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
+    }
 }
