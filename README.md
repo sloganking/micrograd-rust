@@ -21,4 +21,4 @@ d.backward();
 //render d
 ```
 
-![image](https://github.com/sloganking/micrograd-rust/assets/16965931/8dc993e0-203a-4f0d-b587-adec58eecc31)
+![image](https://github.com/sloganking/micrograd-rust/assets/16965931/156dc734-3cdb-4869-9019-5ce252647154)
