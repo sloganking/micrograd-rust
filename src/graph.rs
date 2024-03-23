@@ -30,7 +30,7 @@ fn value_to_graph_recursive(
 
     let node_index_that_prevs_point_to = if let Some(op) = &value.borrow().op {
         // add op label node
-        let label_node_index = graph.add_node(format!("{}", op));
+        let label_node_index = graph.add_node(format!("{}{}", op, "@label"));
 
         // add edge from label to data node
         graph.add_edge(label_node_index, data_node_index, "".to_owned());
@@ -69,6 +69,26 @@ pub fn create_graphviz(g: &Value, filename: &str) {
     dot = dot.replace("\\\"", "");
     dot.insert_str(10, "    rankdir=\"LR\"");
     dot.insert_str(10, "    node [shape=box]\n");
+
+    // turn label nodes into ovals
+    let dot = {
+        let mut new_dot = String::new();
+        for line in dot.lines() {
+            if line.contains("@label") {
+                new_dot.push_str("    node [shape=oval]");
+                new_dot.push('\n');
+                new_dot.push_str(&line.replace("@label", ""));
+                new_dot.push('\n');
+                new_dot.push_str("    node [shape=box]");
+                new_dot.push('\n');
+            } else {
+                new_dot.push_str(line);
+                new_dot.push('\n');
+            }
+        }
+        new_dot
+    };
+
     println!("{}", dot);
 
     let mut file = File::create(filename).unwrap();
