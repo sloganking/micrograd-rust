@@ -10,6 +10,7 @@ Building my own Neural networks in Rust. Inspired by Andrej Karpathy's [microgra
 
 ### Creating and visualizing nodes
 
+#### A simple equation
 ```rust
 let a = Value::from(3.0);
 let b = Value::from(4.0);
@@ -18,7 +19,10 @@ let d = (a - b) * c;
 
 d.backward();
 
-//render d
+graph::render_graph(&d).unwrap()
 ```
 
 ![image](https://github.com/sloganking/micrograd-rust/assets/16965931/156dc734-3cdb-4869-9019-5ce252647154)
+
+#### A single neuron with 3 inputs
+![graph](https://github.com/sloganking/micrograd-rust/assets/16965931/0a0bb79b-0359-48af-8c6e-8e6427e7c913)
