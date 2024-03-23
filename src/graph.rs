@@ -1,14 +1,11 @@
 // Import Value type from main.rs
 use crate::Value;
-
-use uuid::Uuid;
-
 use petgraph::dot::Dot;
 use petgraph::prelude::{DiGraph, NodeIndex};
 use std::collections::HashMap;
-
 use std::fs::File;
 use std::io::Write;
+use uuid::Uuid;
 
 fn value_to_graph_recursive(
     value: &Value,
