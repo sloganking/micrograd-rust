@@ -29,3 +29,22 @@ impl Neuron {
         sum + self.bias.clone()
     }
 }
+
+pub struct Layer {
+    neurons: Vec<Neuron>,
+}
+
+impl Layer {
+    pub fn new(nin: u32, nout: u32) -> Self {
+        let neurons = (0..nout).map(|_| Neuron::new(nin)).collect();
+
+        Layer { neurons }
+    }
+
+    pub fn forward(&self, inputs: Vec<Value>) -> Vec<Value> {
+        self.neurons
+            .iter()
+            .map(|neuron| neuron.forward(inputs.clone()))
+            .collect()
+    }
+}
