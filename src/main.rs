@@ -218,20 +218,5 @@ fn main() {
 
     println!("{:#?}", *d);
 
-    let dir = "test.dot";
-    graph::create_graphviz(&d, dir);
-
-    // can be "png" or "svg".
-    let output_file_type = "png";
-
-    if std::process::Command::new("dot")
-        .arg(format!("-T{}", output_file_type))
-        .arg("-o")
-        .arg(format!("graph.{}", output_file_type))
-        .arg(dir)
-        .output()
-        .is_err()
-    {
-        println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
-    }
+    graph::render_graph(&d);
 }
