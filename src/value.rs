@@ -216,9 +216,7 @@ impl Div for Value {
 }
 
 impl Sum for Value {
-    fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
-        // iter will give us type Value but we need to get the data from it
-
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let mut new_value = ValueData::new(0.0);
 
         let sum: f64 = iter
@@ -236,12 +234,7 @@ impl Sum for Value {
             }
         });
 
-        // let first = iter.next().expect("must contain at least one Value");
-        // let sum = iter.fold(first, |acc, val| acc.borrow().data + val.borrow().data);
-
         Value::new(new_value)
-        // Value::from(test)
-        // sum
     }
 }
 
