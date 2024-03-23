@@ -22,7 +22,7 @@ fn value_to_graph_recursive(
     }
 
     let data_node_index = graph.add_node(format!(
-        "data={:.1} grad={:.1}",
+        "data={:.4} grad={:.4}",
         value.borrow().data,
         value.borrow().grad
     ));
