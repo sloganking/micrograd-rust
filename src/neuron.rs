@@ -19,17 +19,12 @@ impl Neuron {
     }
 
     pub fn forward(&self, inputs: Vec<Value>) -> Value {
-        // let mut sum = Value::from(0.0);
-
-        let mut results = Vec::new();
-        for (weight, input) in self.weights.iter().zip(inputs.iter()) {
-            // let test = weight.clone() * input.clone();
-            // sum = sum + test;
-            // sum += weight.clone() * input.clone();
-            results.push(weight.clone() * input.clone());
-        }
-
-        let sum: Value = results.into_iter().sum();
+        let sum: Value = self
+            .weights
+            .iter()
+            .zip(inputs.iter())
+            .map(|(weight, input)| weight.clone() * input.clone())
+            .sum();
 
         sum + self.bias.clone()
     }
