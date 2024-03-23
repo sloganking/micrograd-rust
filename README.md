@@ -19,7 +19,7 @@ let d = (a - b) * c;
 
 d.backward();
 
-//render d
+graph::render_graph(&d).unwrap()
 ```
 
 ![image](https://github.com/sloganking/micrograd-rust/assets/16965931/156dc734-3cdb-4869-9019-5ce252647154)
