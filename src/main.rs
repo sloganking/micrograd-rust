@@ -217,6 +217,116 @@ impl Div for Value {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn final_grad() {
+        let a = Value::from(3.0);
+        assert_eq!(a.borrow().grad, 0.0);
+        a.backward();
+        assert_eq!(a.borrow().grad, 1.0);
+    }
+
+    #[test]
+    fn add() {
+        let a = Value::from(3.0);
+        let b = Value::from(4.0);
+        let c = a.clone() + b.clone();
+
+        c.backward();
+
+        assert_eq!(c.borrow().data, 7.0);
+        assert_eq!(a.borrow().grad, 1.0);
+        assert_eq!(b.borrow().grad, 1.0);
+    }
+
+    #[test]
+    fn add_self() {
+        let a = Value::from(3.0);
+        let b = a.clone() + a.clone();
+
+        b.backward();
+
+        assert_eq!(b.borrow().data, 6.0);
+        assert_eq!(a.borrow().grad, 2.0);
+    }
+
+    #[test]
+    fn multiply() {
+        let a = Value::from(3.0);
+        let b = Value::from(4.0);
+        let c = a.clone() * b.clone();
+
+        c.backward();
+
+        assert_eq!(c.borrow().data, 12.0);
+        assert_eq!(a.borrow().grad, 4.0);
+        assert_eq!(b.borrow().grad, 3.0);
+    }
+
+    // #[test]
+    // fn multiply_self() {
+    //     let a = Value::from(3.0);
+    //     let b = a.clone() * a.clone();
+
+    //     b.backward();
+
+    //     assert_eq!(b.borrow().data, 9.0);
+    //     assert_eq!(a.borrow().grad, 6.0);
+    // }
+
+    #[test]
+    fn subtract() {
+        let a = Value::from(3.0);
+        let b = Value::from(4.0);
+        let c = a.clone() - b.clone();
+
+        c.backward();
+
+        assert_eq!(c.borrow().data, -1.0);
+        assert_eq!(a.borrow().grad, 1.0);
+        assert_eq!(b.borrow().grad, -1.0);
+    }
+
+    #[test]
+    fn subtract_self() {
+        let a = Value::from(3.0);
+        let b = a.clone() - a.clone();
+
+        b.backward();
+
+        assert_eq!(b.borrow().data, 0.0);
+        assert_eq!(a.borrow().grad, 0.0);
+    }
+
+    #[test]
+    fn relu() {
+        // positive input
+        {
+            let a = Value::from(3.0);
+            let b = a.relu();
+
+            b.backward();
+
+            assert_eq!(b.borrow().data, 3.0);
+            assert_eq!(a.borrow().grad, 1.0);
+        }
+
+        // negative input
+        {
+            let a = Value::from(-3.0);
+            let b = a.relu();
+
+            b.backward();
+
+            assert_eq!(b.borrow().data, 0.0);
+            assert_eq!(a.borrow().grad, 0.0);
+        }
+    }
+}
+
 fn main() {
     let a = Value::from(3.0);
     let b = Value::from(4.0);
