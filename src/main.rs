@@ -90,7 +90,7 @@ impl Value {
         }
     }
 
-    fn relu(&mut self) {
+    fn relu(&self) -> Self {
         let mut new_value = ValueData::new(self.borrow().data.max(0.0));
 
         new_value.prev = vec![self.clone()];
@@ -101,7 +101,7 @@ impl Value {
             }
         });
 
-        *self = Value::new(new_value);
+        Value::new(new_value)
     }
 }
 
