@@ -187,6 +187,26 @@ impl Div for Value {
     }
 }
 
+//implement pow / exponent
+impl Value {
+    pub fn pow(&self, n: Value) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data.powf(n.borrow().data));
+
+        new_value.prev = vec![self.clone(), n];
+        new_value.op = Some(format!("pow()"));
+        new_value.backward = Some(|value: &ValueData| {
+            value.prev[0].borrow_mut().grad += value.grad
+                * value.prev[1].borrow().data
+                * value.prev[0]
+                    .borrow()
+                    .data
+                    .powf(value.prev[1].borrow().data - 1.0);
+        });
+
+        Value::new(new_value)
+    }
+}
+
 fn main() {
     let a = Value::from(3.0);
     let b = Value::from(4.0);
