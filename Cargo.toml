@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 petgraph = "0.6.4"
+rand = "0.8.5"
 uuid = { version = "1.8.0", features = ["v4"] }
