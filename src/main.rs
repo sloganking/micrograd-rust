@@ -205,6 +205,19 @@ impl Value {
 
         Value::new(new_value)
     }
+
+    fn tanh(&self) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data.tanh());
+
+        new_value.prev = vec![self.clone()];
+        new_value.op = Some(format!("tanh()"));
+        new_value.backward = Some(|value: &ValueData| {
+            let tanh = value.data.tanh();
+            value.prev[0].borrow_mut().grad += value.grad * (1.0 - tanh * tanh);
+        });
+
+        Value::new(new_value)
+    }
 }
 
 fn main() {
