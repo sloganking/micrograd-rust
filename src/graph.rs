@@ -68,7 +68,9 @@ pub fn create_graphviz(g: &Value, filename: &str) {
     // Hacky way to adjust graphviz output
     dot = dot.replace("\\\"", "");
     dot.insert_str(10, "    rankdir=\"LR\"");
-    dot.insert_str(10, "    node [shape=box]\n");
+
+    let default_node_shape = "box";
+    dot.insert_str(10, &format!("    node [shape={}]\n", default_node_shape));
 
     // turn label nodes into ovals
     let dot = {
@@ -79,7 +81,7 @@ pub fn create_graphviz(g: &Value, filename: &str) {
                 new_dot.push('\n');
                 new_dot.push_str(&line.replace("@label", ""));
                 new_dot.push('\n');
-                new_dot.push_str("    node [shape=box]");
+                new_dot.push_str(&format!("    node [shape={}]", default_node_shape));
                 new_dot.push('\n');
             } else {
                 new_dot.push_str(line);
