@@ -89,6 +89,20 @@ impl Value {
             topo.push(self.clone());
         }
     }
+
+    fn relu(&mut self) {
+        let mut new_value = ValueData::new(self.borrow().data.max(0.0));
+
+        new_value.prev = vec![self.clone()];
+        new_value.op = Some(String::from("ReLU"));
+        new_value.backward = Some(|value: &ValueData| {
+            if value.data > 0.0 {
+                value.prev[0].borrow_mut().grad += value.grad;
+            }
+        });
+
+        *self = Value::new(new_value);
+    }
 }
 
 impl<T: Into<f64>> From<T> for Value {
