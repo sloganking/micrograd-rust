@@ -103,6 +103,36 @@ impl Value {
 
         Value::new(new_value)
     }
+
+    pub fn pow(&self, n: Value) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data.powf(n.borrow().data));
+
+        new_value.prev = vec![self.clone(), n];
+        new_value.op = Some(format!("pow()"));
+        new_value.backward = Some(|value: &ValueData| {
+            value.prev[0].borrow_mut().grad += value.grad
+                * value.prev[1].borrow().data
+                * value.prev[0]
+                    .borrow()
+                    .data
+                    .powf(value.prev[1].borrow().data - 1.0);
+        });
+
+        Value::new(new_value)
+    }
+
+    fn tanh(&self) -> Self {
+        let mut new_value = ValueData::new(self.borrow().data.tanh());
+
+        new_value.prev = vec![self.clone()];
+        new_value.op = Some(format!("tanh()"));
+        new_value.backward = Some(|value: &ValueData| {
+            let tanh = value.data.tanh();
+            value.prev[0].borrow_mut().grad += value.grad * (1.0 - tanh * tanh);
+        });
+
+        Value::new(new_value)
+    }
 }
 
 impl<T: Into<f64>> From<T> for Value {
@@ -181,39 +211,6 @@ impl Div for Value {
             value.prev[0].borrow_mut().grad += value.grad / value.prev[1].borrow().data;
             value.prev[1].borrow_mut().grad +=
                 value.grad * value.prev[0].borrow().data / value.prev[1].borrow().data.powi(2);
-        });
-
-        Value::new(new_value)
-    }
-}
-
-//implement pow / exponent
-impl Value {
-    pub fn pow(&self, n: Value) -> Self {
-        let mut new_value = ValueData::new(self.borrow().data.powf(n.borrow().data));
-
-        new_value.prev = vec![self.clone(), n];
-        new_value.op = Some(format!("pow()"));
-        new_value.backward = Some(|value: &ValueData| {
-            value.prev[0].borrow_mut().grad += value.grad
-                * value.prev[1].borrow().data
-                * value.prev[0]
-                    .borrow()
-                    .data
-                    .powf(value.prev[1].borrow().data - 1.0);
-        });
-
-        Value::new(new_value)
-    }
-
-    fn tanh(&self) -> Self {
-        let mut new_value = ValueData::new(self.borrow().data.tanh());
-
-        new_value.prev = vec![self.clone()];
-        new_value.op = Some(format!("tanh()"));
-        new_value.backward = Some(|value: &ValueData| {
-            let tanh = value.data.tanh();
-            value.prev[0].borrow_mut().grad += value.grad * (1.0 - tanh * tanh);
         });
 
         Value::new(new_value)
