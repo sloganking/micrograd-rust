@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::fmt::{self, Debug};
 use std::hash::Hash;
 use std::hash::Hasher;
+use std::iter::Sum;
 use std::ops::{self, Add, Div, Mul, Sub};
 use std::{cell::RefCell, rc::Rc};
 use uuid::Uuid;
@@ -211,6 +212,36 @@ impl Div for Value {
         });
 
         Value::new(new_value)
+    }
+}
+
+impl Sum for Value {
+    fn sum<I: Iterator<Item = Self>>(mut iter: I) -> Self {
+        // iter will give us type Value but we need to get the data from it
+
+        let mut new_value = ValueData::new(0.0);
+
+        let sum: f64 = iter
+            .map(|val| {
+                new_value.prev.push(val.clone());
+                val.borrow().data
+            })
+            .sum();
+        new_value.data = sum;
+
+        new_value.op = Some(String::from("+"));
+        new_value.backward = Some(|value: &ValueData| {
+            for val in value.prev.iter() {
+                val.borrow_mut().grad += value.grad;
+            }
+        });
+
+        // let first = iter.next().expect("must contain at least one Value");
+        // let sum = iter.fold(first, |acc, val| acc.borrow().data + val.borrow().data);
+
+        Value::new(new_value)
+        // Value::from(test)
+        // sum
     }
 }
 
