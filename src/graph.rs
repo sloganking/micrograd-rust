@@ -88,27 +88,25 @@ pub fn create_graphviz(g: &Value, filename: &str) {
         new_dot
     };
 
-    println!("{}", dot);
-
     let mut file = File::create(filename).unwrap();
     file.write_all(dot.as_bytes()).unwrap();
 }
 
-pub fn render_graph(v: &Value) {
+pub fn render_graph(v: &Value) -> Option<()> {
     let dir = "test.dot";
     create_graphviz(&v, dir);
 
     // can be "png" or "svg".
     let output_file_type = "png";
 
-    if std::process::Command::new("dot")
+    match std::process::Command::new("dot")
         .arg(format!("-T{}", output_file_type))
         .arg("-o")
         .arg(format!("graph.{}", output_file_type))
         .arg(dir)
         .output()
-        .is_err()
     {
-        println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
+        Ok(_) => Some(()),
+        Err(_) => None,
     }
 }

@@ -7,11 +7,12 @@ fn main() {
     let b = Value::from(4.0);
     let c = Value::from(5.0);
     let d = (a - b) * c;
-    println!("{:#?}", *d);
 
     d.backward();
 
     println!("{:#?}", *d);
 
-    graph::render_graph(&d);
+    if graph::render_graph(&d).is_none() {
+        println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
+    }
 }
