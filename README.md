@@ -1,6 +1,6 @@
 # micrograd-rust
  
-Building my own Neural networks in Rust. Inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd) and [related video](https://youtu.be/VMj-3S1tku0?si=0AJEx-81hEmTKzqf). The code was built piece by piece from the ground up by me. But I took inspiration from [rustygrad](https://github.com/Mathemmagician/rustygrad) when figuring out how to make the Rust borrow checker happy with a DAG.
+Building my own Neural networks in Rust. Inspired by Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd) and [related video](https://youtu.be/VMj-3S1tku0?si=0AJEx-81hEmTKzqf). The code was built piece by piece from the ground up by me. I also took inspiration from [rustygrad](https://github.com/Mathemmagician/rustygrad) when figuring out how to make the Rust borrow checker happy with a DAG.
 
 ## Installation
 - You must have [graphviz](https://graphviz.org/download/) installed for the graph pngs to be generated.
