@@ -21,9 +21,14 @@ fn main() {
     // let inputs = vec![Value::from(1.0), Value::from(2.0)];
     // let out = layer.forward(inputs);
 
-    let mlp = neuron::MLP::new(3, vec![4, 4, 1]);
+    let inputs = vec![
+        Value::from(1.0),
+        Value::from(2.0),
+        // Value::from(3.0),
+        // Value::from(4.0),
+    ];
 
-    let inputs = vec![Value::from(1.0), Value::from(2.0), Value::from(3.0)];
+    let mlp = neuron::MLP::new(inputs.len().try_into().unwrap(), vec![4, 4, 1]);
 
     let out = mlp.forward(inputs);
 
