@@ -48,3 +48,30 @@ impl Layer {
             .collect()
     }
 }
+
+pub struct MLP {
+    layers: Vec<Layer>,
+}
+
+impl MLP {
+    pub fn new(nin: u32, nouts: Vec<u32>) -> Self {
+        let mut layers = Vec::new();
+
+        let mut prev_nout = nin;
+        for nout in nouts {
+            layers.push(Layer::new(prev_nout, nout));
+            prev_nout = nout;
+        }
+
+        MLP { layers }
+    }
+
+    pub fn forward(&self, inputs: Vec<Value>) -> Vec<Value> {
+        let mut outputs = inputs;
+        for layer in self.layers.iter() {
+            outputs = layer.forward(outputs);
+        }
+
+        outputs
+    }
+}
