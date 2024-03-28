@@ -45,6 +45,8 @@ fn main() {
         Value::from(1.0),
     ];
 
+    println!("ys: {:?}", ys);
+
     // generate vec of y predictions
     let preds = xs
         .iter()
@@ -65,15 +67,11 @@ fn main() {
 
     let loss = losses.into_iter().sum::<Value>();
 
+    loss.backward();
+
     println!("loss: {:?}", loss);
 
-    // loss.backward();
-
-    let out = mlp.forward(inputs);
-
-    println!("{:?}", out);
-
-    let out = out[0].clone();
+    let out = loss;
 
     if graph::render_graph(&out).is_none() {
         println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
