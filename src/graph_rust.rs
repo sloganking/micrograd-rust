@@ -40,7 +40,7 @@ fn uuid_to_number(uuid: &Uuid) -> u128 {
     id
 }
 
-fn create_graph(v: &Value, filename: &str) -> Graph {
+fn create_graph(v: &Value) -> Graph {
     // let graph = graph!(directed);
 
     let values = get_all_values(v);
