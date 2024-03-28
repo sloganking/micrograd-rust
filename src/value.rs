@@ -108,12 +108,9 @@ impl Value {
         new_value.prev = vec![self.clone(), n];
         new_value.op = Some(format!("pow()"));
         new_value.backward = Some(|value: &ValueData| {
-            value.prev[0].borrow_mut().grad += value.grad
-                * value.prev[1].borrow().data
-                * value.prev[0]
-                    .borrow()
-                    .data
-                    .powf(value.prev[1].borrow().data - 1.0);
+            let base = value.prev[0].borrow().data;
+            let exp = value.prev[1].borrow().data;
+            value.prev[0].borrow_mut().grad += value.grad * exp * base.powf(exp - 1.0);
         });
 
         Value::new(new_value)
