@@ -74,7 +74,7 @@ pub fn render_graph(v: &Value) -> Option<()> {
     // can be "png" or "svg".
     let output_file_type = "png";
 
-    let graph = create_graph(&v, dir);
+    let graph = create_graph(&v);
 
     let text = graph.print(&mut PrinterContext::default());
 
