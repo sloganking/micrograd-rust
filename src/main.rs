@@ -45,14 +45,6 @@ fn main() {
         Value::from(1.0),
     ];
 
-    // // see what nn currently things of predictions
-    // for (x, y) in xs.iter().zip(ys.iter()) {
-    //     let out = mlp.forward(x.clone());
-    //     let out = out[0].clone();
-    //     let loss = (out.borrow().data - y.borrow().data).powf(2.0);
-    //     println!("{:?} -> {:?} (expected: {:?}, loss: {:?})", x, out, y, loss);
-    // }
-
     // generate vec of y predictions
     let preds = xs
         .iter()
@@ -61,16 +53,6 @@ fn main() {
         .collect::<Vec<_>>();
 
     println!("ypreds: {:?}", preds);
-
-    // let loss = xs
-    //     .iter()
-    //     .zip(ys.iter())
-    //     .map(|(x, y)| {
-    //         let out = mlp.forward(x.clone());
-    //         let out = out[0].clone();
-    //         (out - y.clone()).powf(2.0)
-    //     })
-    //     .sum::<Value>();
 
     // get the loss of the preds
     let losses: Vec<Value> = preds
