@@ -50,8 +50,7 @@ fn main() {
     // generate vec of y predictions
     let preds = xs
         .iter()
-        .zip(ys.iter())
-        .map(|(x, y)| mlp.forward(x.clone())[0].clone())
+        .map(|x| mlp.forward(x.clone())[0].clone())
         .collect::<Vec<_>>();
 
     println!("ypreds: {:?}", preds);
