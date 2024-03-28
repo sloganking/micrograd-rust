@@ -28,6 +28,13 @@ impl Neuron {
 
         sum + self.bias.clone()
     }
+
+    pub fn parameters(&self) -> Vec<Value> {
+        let mut params = self.weights.clone();
+        params.push(self.bias.clone());
+
+        params
+    }
 }
 
 pub struct Layer {
@@ -45,6 +52,13 @@ impl Layer {
         self.neurons
             .iter()
             .map(|neuron| neuron.forward(inputs.clone()))
+            .collect()
+    }
+
+    pub fn parameters(&self) -> Vec<Value> {
+        self.neurons
+            .iter()
+            .flat_map(|neuron| neuron.parameters())
             .collect()
     }
 }
@@ -73,5 +87,19 @@ impl MLP {
         }
 
         outputs
+    }
+
+    pub fn parameters(&self) -> Vec<Value> {
+        self.layers
+            .iter()
+            .flat_map(|layer| layer.parameters())
+            .collect()
+    }
+
+    pub fn zero_grad(&self) {
+        let params = self.parameters();
+        for param in params.iter() {
+            param.borrow_mut().grad = 0.0;
+        }
     }
 }
