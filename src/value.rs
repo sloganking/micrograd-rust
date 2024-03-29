@@ -15,6 +15,7 @@ pub struct ValueData {
     pub prev: Vec<Value>,
     pub op: Option<String>,
     pub uuid: Uuid,
+    pub subgraph_id: Option<Uuid>,
 }
 
 impl ValueData {
@@ -26,6 +27,7 @@ impl ValueData {
             prev: Vec::new(),
             op: None,
             uuid: Uuid::new_v4(),
+            subgraph_id: None,
         }
     }
 }

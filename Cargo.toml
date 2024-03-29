@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+graphviz-rust = "0.7.2"
 petgraph = "0.6.4"
 rand = "0.8.5"
 uuid = { version = "1.8.0", features = ["v4"] }
