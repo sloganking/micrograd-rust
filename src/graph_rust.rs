@@ -8,6 +8,7 @@ use std::vec;
 use crate::neuron::SubgraphTreeNode;
 use crate::Value;
 use graphviz_rust::dot_generator::*;
+use graphviz_rust::dot_structures::GraphAttributes;
 use graphviz_rust::dot_structures::*;
 use graphviz_rust::{
     attributes::*,
@@ -15,6 +16,7 @@ use graphviz_rust::{
     exec, exec_dot, parse,
     printer::{DotPrinter, PrinterContext},
 };
+use petgraph::graph;
 use uuid::Uuid;
 
 fn get_prevs_of_recursive(v: &Value, set: &mut HashSet<Value>) -> Vec<Value> {
@@ -108,7 +110,9 @@ fn render_subgraph_tree_recursive(
         let attributes = vec![
             attr!("label", "\"Neuron\""),
             SubgraphAttributes::color(color_name::blue),
-            // SubgraphAttributes::bgcolor(color_name::red),
+            // SubgraphAttributes::margin(100.0),
+            // same,min,source,max,sink
+            // SubgraphAttributes::rank(rank::sink),
         ];
         let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
 
@@ -199,8 +203,14 @@ fn create_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Graph {
             None => value.borrow().uuid.as_u128(),
         };
         for prev in value.borrow().prev.iter() {
+            let edge_attributes = vec![
+                // attr!("color", "black"),
+                // attr!("penwidth", 2.0),
+                // attr!("label", "edge"),
+                // EdgeAttributes::splines(splines::ortho),
+            ];
             let edge = stmt!(
-                edge!(node_id!(prev.borrow().uuid.as_u128()) => node_id!(node_or_label_node_id))
+                edge!(node_id!(prev.borrow().uuid.as_u128()) => node_id!(node_or_label_node_id),edge_attributes)
             );
             edge_statements.push(edge);
         }
@@ -209,7 +219,13 @@ fn create_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Graph {
     graph_statements.extend(edge_statements);
 
     // create graph attributes
-    let graph_attributes = vec![attr!("rankdir", "LR")];
+    let graph_attributes = vec![
+        attr!("rankdir", "LR"),
+        attr!("ranksep", 2.0),
+        attr!("splines", "ortho"),
+        // GraphAttributes::splines(splines::ortho),
+        // attr!("nodesep", 2.0),
+    ];
     let attributes_statements: Vec<Stmt> = graph_attributes.into_iter().map(Stmt::from).collect();
 
     graph_statements.extend(attributes_statements);
