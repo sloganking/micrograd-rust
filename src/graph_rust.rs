@@ -42,10 +42,9 @@ fn value_to_statements(
 
     let id = &v.borrow().uuid.as_u128();
     let label = format!(
-        "\"data={:.4} grad={:.4} {}\"",
+        "\"data={:.4} grad={:.4}\"",
         v.borrow().data,
         v.borrow().grad,
-        v.borrow().op.as_ref().unwrap_or(&"".to_string())
     );
     let node = stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
     statements.push(node);
@@ -91,16 +90,17 @@ fn create_graph(v: &Value) -> Graph {
 
         // add attributes to the subgraph
         let attributes = vec![
-            attr!("label", "test"),
+            attr!("label", "\"Neuron\""),
             SubgraphAttributes::color(color_name::blue),
-            SubgraphAttributes::bgcolor(color_name::red),
+            // SubgraphAttributes::bgcolor(color_name::red),
         ];
         let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
 
         subgraph_statements.extend(attributes_statements);
 
+        let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
         // let subgraph = vec![stmt!(subgraph!(subgraph_id.as_u128(), subgraph_nodes))];
-        subgraphs.push(stmt!(subgraph!(subgraph_id.as_u128(), subgraph_statements)));
+        subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
     }
 
     graph_statements.extend(subgraphs);
