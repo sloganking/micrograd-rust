@@ -33,13 +33,6 @@ fn get_all_values(v: &Value) -> Vec<Value> {
     get_prevs_of_recursive(v, &mut set)
 }
 
-/// Used because graphviz doesn't like hex as node IDs.
-fn uuid_to_number(uuid: &Uuid) -> u128 {
-    let id = uuid.as_simple().to_string();
-    let id = u128::from_str_radix(&id, 16).unwrap();
-    id
-}
-
 fn create_graph(v: &Value) -> Graph {
     // let graph = graph!(directed);
 
@@ -48,7 +41,7 @@ fn create_graph(v: &Value) -> Graph {
     // create all nodes
     let mut nodes = vec![];
     for value in values.iter() {
-        let id = uuid_to_number(&value.borrow().uuid);
+        let id = &value.borrow().uuid.as_u128();
         println!("id: {}", id);
         let label = format!(
             "\"data={:.4} grad={:.4} {}\"",
