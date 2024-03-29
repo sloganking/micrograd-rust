@@ -31,7 +31,9 @@ fn get_prevs_of_recursive(v: &Value, set: &mut HashSet<Value>) -> Vec<Value> {
 
 fn get_all_values(v: &Value) -> Vec<Value> {
     let mut set = HashSet::new();
-    get_prevs_of_recursive(v, &mut set)
+    let mut all_values = get_prevs_of_recursive(v, &mut set);
+    all_values.push(v.clone());
+    all_values
 }
 
 fn value_to_statements(
