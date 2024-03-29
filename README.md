@@ -26,3 +26,6 @@ graph::render_graph(&d).unwrap()
 
 #### A single neuron with 3 inputs
 ![graph](https://github.com/sloganking/micrograd-rust/assets/16965931/0a0bb79b-0359-48af-8c6e-8e6427e7c913)
+
+### A [4,4,1] layer MLP
+![graph2](https://github.com/sloganking/micrograd-rust/assets/16965931/6263b8d6-5297-4f5e-882a-5484f528e7b4)
