@@ -132,25 +132,45 @@ fn create_graph(v: &Value) -> Graph {
 
     graph_statements.extend(nodes_outside_subgraphs);
 
-    // create all nodes
-    let mut nodes = vec![];
+    // create all edges
+    let mut edge_statements = vec![];
     for value in values.iter() {
-        let id = &value.borrow().uuid.as_u128();
-        println!("id: {}", id);
-        let label = format!(
-            "\"data={:.4} grad={:.4} {}\"",
-            value.borrow().data,
-            value.borrow().grad,
-            value.borrow().op.as_ref().unwrap_or(&"".to_string())
-        );
-        let node =
-            stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
-        nodes.push(node);
+        for prev in value.borrow().prev.iter() {
+            let edge = stmt!(
+                edge!(node_id!(prev.borrow().uuid.as_u128()) => node_id!(value.borrow().uuid.as_u128()))
+            );
+            edge_statements.push(edge);
+        }
     }
+
+    graph_statements.extend(edge_statements);
+
+    // // create all nodes
+    // let mut nodes = vec![];
+    // for value in values.iter() {
+    //     let id = &value.borrow().uuid.as_u128();
+    //     println!("id: {}", id);
+    //     let label = format!(
+    //         "\"data={:.4} grad={:.4} {}\"",
+    //         value.borrow().data,
+    //         value.borrow().grad,
+    //         value.borrow().op.as_ref().unwrap_or(&"".to_string())
+    //     );
+    //     let node =
+    //         stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
+    //     nodes.push(node);
+    // }
 
     // let stmts: Vec<Stmt> = nodes.into_iter().map(Stmt::from).collect();
 
-    let attributes = vec![attr!("rankdir", "LR")];
+    // let attributes = vec![attr!("rankdir", "LR")];
+
+    // create graph attributes
+    let graph_attributes = vec![attr!("rankdir", "LR")];
+    let attributes_statements: Vec<Stmt> = graph_attributes.into_iter().map(Stmt::from).collect();
+
+    graph_statements.extend(attributes_statements);
+
     let graph = graph!(di id!("test"), graph_statements);
 
     graph
