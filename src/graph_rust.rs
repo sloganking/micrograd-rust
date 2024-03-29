@@ -77,33 +77,35 @@ fn create_graph(v: &Value) -> Graph {
 
     let mut graph_statements = vec![];
 
-    let mut subgraphs = vec![];
     // create all nodes in all subgraphs
-    for (subgraph_id, subgraph_values) in subgraph_map.iter() {
-        let mut subgraph_statements = vec![];
+    let subgraphs = {
+        let mut subgraphs = vec![];
+        for (subgraph_id, subgraph_values) in subgraph_map.iter() {
+            let mut subgraph_statements = vec![];
 
-        // add all the nodes to the subgraph
-        for value in subgraph_values.iter() {
-            subgraph_statements.extend(value_to_statements(
-                value,
-                &mut values_corresponding_op_node,
-            ));
+            // add all the nodes to the subgraph
+            for value in subgraph_values.iter() {
+                subgraph_statements.extend(value_to_statements(
+                    value,
+                    &mut values_corresponding_op_node,
+                ));
+            }
+
+            // add attributes to the subgraph
+            let attributes = vec![
+                attr!("label", "\"Neuron\""),
+                SubgraphAttributes::color(color_name::blue),
+                // SubgraphAttributes::bgcolor(color_name::red),
+            ];
+            let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
+
+            subgraph_statements.extend(attributes_statements);
+
+            let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
+            subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
         }
-
-        // add attributes to the subgraph
-        let attributes = vec![
-            attr!("label", "\"Neuron\""),
-            SubgraphAttributes::color(color_name::blue),
-            // SubgraphAttributes::bgcolor(color_name::red),
-        ];
-        let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
-
-        subgraph_statements.extend(attributes_statements);
-
-        let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
-        // let subgraph = vec![stmt!(subgraph!(subgraph_id.as_u128(), subgraph_nodes))];
-        subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
-    }
+        subgraphs
+    };
 
     graph_statements.extend(subgraphs);
 
