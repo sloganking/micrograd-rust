@@ -4,6 +4,7 @@ use crate::Value;
 
 pub struct SubgraphTreeNode {
     pub subgraph_id: Uuid,
+    pub label: String,
     pub children: Vec<SubgraphTreeNode>,
 }
 
@@ -69,6 +70,7 @@ impl Neuron {
         if let Some(subgraph_id) = self.subgraph_id {
             return Some(SubgraphTreeNode {
                 subgraph_id,
+                label: "Neuron".to_string(),
                 children: vec![],
             });
         }
@@ -111,6 +113,7 @@ impl Layer {
         if let Some(subgraph_id) = self.subgraph_id {
             return Some(SubgraphTreeNode {
                 subgraph_id,
+                label: "Layer".to_string(),
                 children: self
                     .neurons
                     .iter()
@@ -172,6 +175,7 @@ impl MLP {
         if let Some(subgraph_id) = self.subgraph_id {
             return Some(SubgraphTreeNode {
                 subgraph_id,
+                label: "MLP".to_string(),
                 children: self
                     .layers
                     .iter()

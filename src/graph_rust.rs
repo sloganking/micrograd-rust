@@ -108,7 +108,7 @@ fn render_subgraph_tree_recursive(
 
         // add attributes to the subgraph
         let attributes = vec![
-            attr!("label", "\"Neuron\""),
+            SubgraphAttributes::label("\"".to_string() + &subgraph.label + "\""),
             SubgraphAttributes::color(color_name::blue),
             // SubgraphAttributes::margin(100.0),
             // same,min,source,max,sink
