@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::vec;
 
+use crate::neuron::SubgraphTreeNode;
 use crate::Value;
 use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::*;
@@ -66,7 +67,65 @@ fn value_to_statements(
     statements
 }
 
-fn create_graph(v: &Value) -> Graph {
+/// recursively render the subgraph tree node and all it's children
+fn render_subgraph_tree_recursive(
+    subgraph: &SubgraphTreeNode,
+    subgraph_to_value_map: &HashMap<Uuid, Vec<Value>>,
+    values_corresponding_op_node: &mut HashMap<Uuid, u128>,
+) -> Vec<Stmt> {
+    // recursively turn the child subgraphs into statements
+    let mut childrens_statments = vec![];
+
+    for child_subgraph in subgraph.children.iter() {
+        let this_child_statements = render_subgraph_tree_recursive(
+            child_subgraph,
+            subgraph_to_value_map,
+            values_corresponding_op_node,
+        );
+        // childrens_statments.push(stmt!(subgraph!(
+        //     "cluster".to_owned() + child_subgraph.subgraph_id.as_u128().to_string().as_str(),
+        //     this_child_statements
+        // )));
+        childrens_statments.extend(this_child_statements)
+    }
+
+    // turn the parameter given subgraph into statements
+    let this_subgraph_statement = {
+        let mut this_subgraph_statements = vec![];
+
+        let empty_vec: Vec<Value> = vec![];
+        let this_subgraphs_values = subgraph_to_value_map
+            .get(&subgraph.subgraph_id)
+            .unwrap_or(&empty_vec);
+
+        // add all the nodes to the subgraph
+        for value in this_subgraphs_values.iter() {
+            this_subgraph_statements
+                .extend(value_to_statements(value, values_corresponding_op_node));
+        }
+
+        // add attributes to the subgraph
+        let attributes = vec![
+            attr!("label", "\"Neuron\""),
+            SubgraphAttributes::color(color_name::blue),
+            // SubgraphAttributes::bgcolor(color_name::red),
+        ];
+        let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
+
+        this_subgraph_statements.extend(attributes_statements);
+
+        // append children to this subgraph
+        this_subgraph_statements.extend(childrens_statments);
+
+        let this_subgraph_id =
+            "cluster".to_owned() + subgraph.subgraph_id.as_u128().to_string().as_str();
+        stmt!(subgraph!(this_subgraph_id, this_subgraph_statements))
+    };
+
+    vec![this_subgraph_statement]
+}
+
+fn create_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Graph {
     // let graph = graph!(directed);
 
     let mut values_corresponding_op_node: HashMap<Uuid, u128> = HashMap::new();
@@ -78,34 +137,40 @@ fn create_graph(v: &Value) -> Graph {
     let mut graph_statements = vec![];
 
     // create all nodes in all subgraphs
-    let subgraphs = {
-        let mut subgraphs = vec![];
-        for (subgraph_id, subgraph_values) in subgraph_map.iter() {
-            let mut subgraph_statements = vec![];
+    // let subgraphs = {
+    //     let mut subgraphs = vec![];
+    //     for (subgraph_id, subgraph_values) in subgraph_map.iter() {
+    //         let mut subgraph_statements = vec![];
 
-            // add all the nodes to the subgraph
-            for value in subgraph_values.iter() {
-                subgraph_statements.extend(value_to_statements(
-                    value,
-                    &mut values_corresponding_op_node,
-                ));
-            }
+    //         // add all the nodes to the subgraph
+    //         for value in subgraph_values.iter() {
+    //             subgraph_statements.extend(value_to_statements(
+    //                 value,
+    //                 &mut values_corresponding_op_node,
+    //             ));
+    //         }
 
-            // add attributes to the subgraph
-            let attributes = vec![
-                attr!("label", "\"Neuron\""),
-                SubgraphAttributes::color(color_name::blue),
-                // SubgraphAttributes::bgcolor(color_name::red),
-            ];
-            let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
+    //         // add attributes to the subgraph
+    //         let attributes = vec![
+    //             attr!("label", "\"Neuron\""),
+    //             SubgraphAttributes::color(color_name::blue),
+    //             // SubgraphAttributes::bgcolor(color_name::red),
+    //         ];
+    //         let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
 
-            subgraph_statements.extend(attributes_statements);
+    //         subgraph_statements.extend(attributes_statements);
 
-            let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
-            subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
-        }
-        subgraphs
-    };
+    //         let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
+    //         subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
+    //     }
+    //     subgraphs
+    // };
+
+    let subgraphs = render_subgraph_tree_recursive(
+        &subgraph_tree,
+        &subgraph_map,
+        &mut values_corresponding_op_node,
+    );
 
     graph_statements.extend(subgraphs);
 
@@ -173,12 +238,12 @@ fn get_subgraph_map(v: &Value) -> HashMap<Uuid, Vec<Value>> {
     map
 }
 
-pub fn render_graph(v: &Value) -> Option<()> {
+pub fn render_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Option<()> {
     let dir = "test.dot";
     // can be "png" or "svg".
     let output_file_type = "png";
 
-    let graph = create_graph(&v);
+    let graph = create_graph(&v, subgraph_tree);
 
     let text = graph.print(&mut PrinterContext::default());
 

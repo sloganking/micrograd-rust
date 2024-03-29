@@ -2,6 +2,11 @@ use uuid::Uuid;
 
 use crate::Value;
 
+pub struct SubgraphTreeNode {
+    pub subgraph_id: Uuid,
+    pub children: Vec<SubgraphTreeNode>,
+}
+
 pub struct Neuron {
     weights: Vec<Value>,
     bias: Value,
@@ -10,7 +15,7 @@ pub struct Neuron {
 
 impl Neuron {
     pub fn new(nin: u32) -> Self {
-        let subgraph_id = Some(Uuid::new_v4());
+        let neuron_subgraph_id = Some(Uuid::new_v4());
 
         // Initialize weights with random values between -1 and 1
         let weights: Vec<Value> = (0..nin)
@@ -19,18 +24,18 @@ impl Neuron {
 
         // assign neuron's subgraph to each weight
         for weight in weights.iter() {
-            weight.borrow_mut().subgraph_id = subgraph_id;
+            weight.borrow_mut().subgraph_id = neuron_subgraph_id;
         }
 
         // Initialize bias with random value between -1 and 1
         let bias = Value::from(rand::random::<f64>() * 2.0 - 1.0);
         // assign neuron's subgraph to bias
-        bias.borrow_mut().subgraph_id = subgraph_id;
+        bias.borrow_mut().subgraph_id = neuron_subgraph_id;
 
         Neuron {
             weights,
             bias,
-            subgraph_id: subgraph_id,
+            subgraph_id: neuron_subgraph_id,
         }
     }
 
@@ -59,17 +64,33 @@ impl Neuron {
 
         params
     }
+
+    pub fn get_subgraph_tree(&self) -> Option<SubgraphTreeNode> {
+        if let Some(subgraph_id) = self.subgraph_id {
+            return Some(SubgraphTreeNode {
+                subgraph_id,
+                children: vec![],
+            });
+        }
+        None
+    }
 }
 
 pub struct Layer {
     neurons: Vec<Neuron>,
+    subgraph_id: Option<Uuid>,
 }
 
 impl Layer {
     pub fn new(nin: u32, nout: u32) -> Self {
+        let layer_subgraph_id = Some(Uuid::new_v4());
+
         let neurons = (0..nout).map(|_| Neuron::new(nin)).collect();
 
-        Layer { neurons }
+        Layer {
+            neurons,
+            subgraph_id: layer_subgraph_id,
+        }
     }
 
     pub fn forward(&self, inputs: Vec<Value>) -> Vec<Value> {
@@ -85,14 +106,31 @@ impl Layer {
             .flat_map(|neuron| neuron.parameters())
             .collect()
     }
+
+    pub fn get_subgraph_tree(&self) -> Option<SubgraphTreeNode> {
+        if let Some(subgraph_id) = self.subgraph_id {
+            return Some(SubgraphTreeNode {
+                subgraph_id,
+                children: self
+                    .neurons
+                    .iter()
+                    .filter_map(|neuron| neuron.get_subgraph_tree())
+                    .collect(),
+            });
+        }
+        None
+    }
 }
 
 pub struct MLP {
     layers: Vec<Layer>,
+    subgraph_id: Option<Uuid>,
 }
 
 impl MLP {
     pub fn new(nin: u32, nouts: Vec<u32>) -> Self {
+        let mlp_subgraph_id = Some(Uuid::new_v4());
+
         let mut layers = Vec::new();
 
         let mut prev_nout = nin;
@@ -101,7 +139,10 @@ impl MLP {
             prev_nout = nout;
         }
 
-        MLP { layers }
+        MLP {
+            layers,
+            subgraph_id: mlp_subgraph_id,
+        }
     }
 
     pub fn forward(&self, inputs: Vec<Value>) -> Vec<Value> {
@@ -125,5 +166,19 @@ impl MLP {
         for param in params.iter() {
             param.borrow_mut().grad = 0.0;
         }
+    }
+
+    pub fn get_subgraph_tree(&self) -> Option<SubgraphTreeNode> {
+        if let Some(subgraph_id) = self.subgraph_id {
+            return Some(SubgraphTreeNode {
+                subgraph_id,
+                children: self
+                    .layers
+                    .iter()
+                    .filter_map(|layer| layer.get_subgraph_tree())
+                    .collect(),
+            });
+        }
+        None
     }
 }

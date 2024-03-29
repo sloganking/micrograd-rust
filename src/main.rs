@@ -34,9 +34,9 @@ fn main() {
     // create dataset
     let xs = vec![
         vec![Value::from(2.0), Value::from(3.0), Value::from(-1.0)],
-        vec![Value::from(3.0), Value::from(-1.0), Value::from(0.5)],
-        vec![Value::from(0.5), Value::from(1.0), Value::from(1.0)],
-        vec![Value::from(1.0), Value::from(1.0), Value::from(-1.0)],
+        // vec![Value::from(3.0), Value::from(-1.0), Value::from(0.5)],
+        // vec![Value::from(0.5), Value::from(1.0), Value::from(1.0)],
+        // vec![Value::from(1.0), Value::from(1.0), Value::from(-1.0)],
     ];
 
     let ys = vec![
@@ -147,7 +147,7 @@ fn main() {
 
         let out = loss;
 
-        if graph_rust::render_graph(&out).is_none() {
+        if graph_rust::render_graph(&out, mlp.get_subgraph_tree().unwrap()).is_none() {
             println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
         }
     }
