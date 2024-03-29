@@ -34,8 +34,41 @@ fn get_all_values(v: &Value) -> Vec<Value> {
     get_prevs_of_recursive(v, &mut set)
 }
 
+fn value_to_statements(
+    v: &Value,
+    values_corresponding_op_node: &mut HashMap<Uuid, u128>,
+) -> Vec<Stmt> {
+    let mut statements = vec![];
+
+    let id = &v.borrow().uuid.as_u128();
+    let label = format!(
+        "\"data={:.4} grad={:.4} {}\"",
+        v.borrow().data,
+        v.borrow().grad,
+        v.borrow().op.as_ref().unwrap_or(&"".to_string())
+    );
+    let node = stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
+    statements.push(node);
+
+    if let Some(op) = &v.borrow().op {
+        let label_node_id = Uuid::new_v4().as_u128();
+        values_corresponding_op_node.insert(v.borrow().uuid, label_node_id);
+        let label_node = stmt!(
+            node!(label_node_id; NodeAttributes::shape(shape::oval),  NodeAttributes::label("\"".to_string() + op + "\""))
+        );
+        statements.push(label_node);
+
+        let op_edge = stmt!(edge!(node_id!(label_node_id) => node_id!(id)));
+        statements.push(op_edge);
+    }
+
+    statements
+}
+
 fn create_graph(v: &Value) -> Graph {
     // let graph = graph!(directed);
+
+    let mut values_corresponding_op_node: HashMap<Uuid, u128> = HashMap::new();
 
     let values = get_all_values(v);
 
@@ -44,40 +77,16 @@ fn create_graph(v: &Value) -> Graph {
     let mut graph_statements = vec![];
 
     let mut subgraphs = vec![];
-    // create all nodes in subgraphs
-    for (i, (subgraph_id, subgraph_values)) in subgraph_map.iter().enumerate() {
-        let mut statements = vec![];
+    // create all nodes in all subgraphs
+    for (subgraph_id, subgraph_values) in subgraph_map.iter() {
+        let mut subgraph_statements = vec![];
 
         // add all the nodes to the subgraph
         for value in subgraph_values.iter() {
-            let id = &value.borrow().uuid.as_u128();
-
-            let label = format!(
-                "\"data={:.4} grad={:.4} {}\"",
-                value.borrow().data,
-                value.borrow().grad,
-                value.borrow().op.as_ref().unwrap_or(&"".to_string())
-            );
-
-            let node = if i == 0 {
-                stmt!(
-                    node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label), NodeAttributes::color(color_name::blue))
-                )
-            } else {
-                stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)))
-            };
-            statements.push(node);
-
-            if let Some(op) = &value.borrow().op {
-                let label_node_id = Uuid::new_v4().as_u128();
-                let label_node = stmt!(
-                    node!(label_node_id; NodeAttributes::shape(shape::oval),  NodeAttributes::label("\"".to_string() + op + "\""))
-                );
-                statements.push(label_node);
-
-                let op_edge = stmt!(edge!(node_id!(label_node_id) => node_id!(id)));
-                statements.push(op_edge);
-            }
+            subgraph_statements.extend(value_to_statements(
+                value,
+                &mut values_corresponding_op_node,
+            ));
         }
 
         // add attributes to the subgraph
@@ -88,10 +97,10 @@ fn create_graph(v: &Value) -> Graph {
         ];
         let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
 
-        statements.extend(attributes_statements);
+        subgraph_statements.extend(attributes_statements);
 
         // let subgraph = vec![stmt!(subgraph!(subgraph_id.as_u128(), subgraph_nodes))];
-        subgraphs.push(stmt!(subgraph!(subgraph_id.as_u128(), statements)));
+        subgraphs.push(stmt!(subgraph!(subgraph_id.as_u128(), subgraph_statements)));
     }
 
     graph_statements.extend(subgraphs);
@@ -105,27 +114,10 @@ fn create_graph(v: &Value) -> Graph {
                 continue;
             }
 
-            let id = &value.borrow().uuid.as_u128();
-            let label = format!(
-                "\"data={:.4} grad={:.4} {}\"",
-                value.borrow().data,
-                value.borrow().grad,
-                value.borrow().op.as_ref().unwrap_or(&"".to_string())
-            );
-            let node =
-                stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
-            nodes_outside_subgraphs.push(node);
-
-            if let Some(op) = &value.borrow().op {
-                let label_node_id = Uuid::new_v4().as_u128();
-                let label_node = stmt!(
-                    node!(label_node_id; NodeAttributes::shape(shape::oval),  NodeAttributes::label("\"".to_string() + op + "\""))
-                );
-                nodes_outside_subgraphs.push(label_node);
-
-                let op_edge = stmt!(edge!(node_id!(label_node_id) => node_id!(id)));
-                nodes_outside_subgraphs.push(op_edge);
-            }
+            nodes_outside_subgraphs.extend(value_to_statements(
+                value,
+                &mut values_corresponding_op_node,
+            ));
         }
         nodes_outside_subgraphs
     };
@@ -135,9 +127,13 @@ fn create_graph(v: &Value) -> Graph {
     // create all edges
     let mut edge_statements = vec![];
     for value in values.iter() {
+        let node_or_label_node_id = match values_corresponding_op_node.get(&value.borrow().uuid) {
+            Some(op_node_id) => *op_node_id,
+            None => value.borrow().uuid.as_u128(),
+        };
         for prev in value.borrow().prev.iter() {
             let edge = stmt!(
-                edge!(node_id!(prev.borrow().uuid.as_u128()) => node_id!(value.borrow().uuid.as_u128()))
+                edge!(node_id!(prev.borrow().uuid.as_u128()) => node_id!(node_or_label_node_id))
             );
             edge_statements.push(edge);
         }
