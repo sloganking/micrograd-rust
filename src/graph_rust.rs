@@ -106,7 +106,6 @@ fn create_graph(v: &Value) -> Graph {
     graph_statements.extend(subgraphs);
 
     // create all nodes outside of subgraphs
-
     let nodes_outside_subgraphs = {
         let mut nodes_outside_subgraphs = vec![];
         for value in values.iter() {
@@ -121,7 +120,6 @@ fn create_graph(v: &Value) -> Graph {
         }
         nodes_outside_subgraphs
     };
-
     graph_statements.extend(nodes_outside_subgraphs);
 
     // create all edges
@@ -140,26 +138,6 @@ fn create_graph(v: &Value) -> Graph {
     }
 
     graph_statements.extend(edge_statements);
-
-    // // create all nodes
-    // let mut nodes = vec![];
-    // for value in values.iter() {
-    //     let id = &value.borrow().uuid.as_u128();
-    //     println!("id: {}", id);
-    //     let label = format!(
-    //         "\"data={:.4} grad={:.4} {}\"",
-    //         value.borrow().data,
-    //         value.borrow().grad,
-    //         value.borrow().op.as_ref().unwrap_or(&"".to_string())
-    //     );
-    //     let node =
-    //         stmt!(node!(id; NodeAttributes::shape(shape::box_),  NodeAttributes::label(label)));
-    //     nodes.push(node);
-    // }
-
-    // let stmts: Vec<Stmt> = nodes.into_iter().map(Stmt::from).collect();
-
-    // let attributes = vec![attr!("rankdir", "LR")];
 
     // create graph attributes
     let graph_attributes = vec![attr!("rankdir", "LR")];
