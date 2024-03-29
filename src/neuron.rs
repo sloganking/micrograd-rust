@@ -1,21 +1,37 @@
+use uuid::Uuid;
+
 use crate::Value;
 
 pub struct Neuron {
     weights: Vec<Value>,
     bias: Value,
+    pub subgraph_id: Option<Uuid>,
 }
 
 impl Neuron {
     pub fn new(nin: u32) -> Self {
+        let subgraph_id = Some(Uuid::new_v4());
+
         // Initialize weights with random values between -1 and 1
-        let weights = (0..nin)
+        let weights: Vec<Value> = (0..nin)
             .map(|_| Value::from(rand::random::<f64>() * 2.0 - 1.0))
             .collect();
 
+        // assign neuron's subgraph to each weight
+        for weight in weights.iter() {
+            weight.borrow_mut().subgraph_id = subgraph_id;
+        }
+
         // Initialize bias with random value between -1 and 1
         let bias = Value::from(rand::random::<f64>() * 2.0 - 1.0);
+        // assign neuron's subgraph to bias
+        bias.borrow_mut().subgraph_id = subgraph_id;
 
-        Neuron { weights, bias }
+        Neuron {
+            weights,
+            bias,
+            subgraph_id: Some(Uuid::new_v4()),
+        }
     }
 
     pub fn forward(&self, inputs: Vec<Value>) -> Value {
@@ -23,10 +39,18 @@ impl Neuron {
             .weights
             .iter()
             .zip(inputs.iter())
-            .map(|(weight, input)| weight.clone() * input.clone())
+            .map(|(weight, input)| {
+                let weighed_input = weight.clone() * input.clone();
+                weighed_input.borrow_mut().subgraph_id = self.subgraph_id;
+                weighed_input
+            })
             .sum();
+        sum.borrow_mut().subgraph_id = self.subgraph_id;
 
-        sum + self.bias.clone()
+        let sum_plus_bias = sum + self.bias.clone();
+        sum_plus_bias.borrow_mut().subgraph_id = self.subgraph_id;
+
+        sum_plus_bias
     }
 
     pub fn parameters(&self) -> Vec<Value> {
