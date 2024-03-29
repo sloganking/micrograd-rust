@@ -30,7 +30,7 @@ impl Neuron {
         Neuron {
             weights,
             bias,
-            subgraph_id: Some(Uuid::new_v4()),
+            subgraph_id: subgraph_id,
         }
     }
 
