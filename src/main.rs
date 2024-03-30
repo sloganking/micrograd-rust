@@ -1,5 +1,4 @@
 mod graph;
-mod graph_rust;
 mod neuron;
 mod value;
 use crate::value::Value;
@@ -73,10 +72,6 @@ fn main() {
 
     let out = loss;
 
-    if graph::render_graph(&out).is_none() {
-        println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
-    }
-
     let params = mlp.parameters();
     println!("params: {:#?}", params);
     println!("num params: {:?}", params.len());
@@ -147,7 +142,7 @@ fn main() {
 
         let out = loss;
 
-        if graph_rust::render_graph(&out, mlp.get_subgraph_tree().unwrap()).is_none() {
+        if graph::render_graph(&out, mlp.get_subgraph_tree().unwrap()).is_none() {
             println!("Error: Rendering dot file to an image failed. Please ensure that you have graphviz installed (https://graphviz.org/download/), and that the \"dot\" command is runnable from your terminal.");
         }
     }
