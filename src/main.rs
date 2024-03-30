@@ -4,23 +4,6 @@ mod value;
 use crate::value::Value;
 
 fn main() {
-    // let a = Value::from(3.0);
-    // let b = Value::from(4.0);
-    // let c = Value::from(5.0);
-    // let d = (a - b) * c;
-
-    // d.backward();
-
-    // let neuron = neuron::Neuron::new(3);
-    // let inputs = vec![Value::from(1.0), Value::from(2.0), Value::from(3.0)];
-    // let out = neuron.forward(inputs);
-    // let out = out.tanh();
-    // out.backward();
-
-    // let layer = neuron::Layer::new(2, 3);
-    // let inputs = vec![Value::from(1.0), Value::from(2.0)];
-    // let out = layer.forward(inputs);
-
     let inputs = vec![
         Value::from(1.0),
         Value::from(2.0),
