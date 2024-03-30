@@ -108,7 +108,7 @@ impl Value {
         let mut new_value = ValueData::new(self.borrow().data.powf(n.borrow().data));
 
         new_value.prev = vec![self.clone(), n];
-        new_value.op = Some(format!("pow()"));
+        new_value.op = Some("pow()".to_string());
         new_value.backward = Some(|value: &ValueData| {
             let base = value.prev[0].borrow().data;
             let exp = value.prev[1].borrow().data;
@@ -122,7 +122,7 @@ impl Value {
         let mut new_value = ValueData::new(self.borrow().data.tanh());
 
         new_value.prev = vec![self.clone()];
-        new_value.op = Some(format!("tanh()"));
+        new_value.op = Some("tanh()".to_string());
         new_value.backward = Some(|value: &ValueData| {
             let tanh = value.data.tanh();
             value.prev[0].borrow_mut().grad += value.grad * (1.0 - tanh * tanh);

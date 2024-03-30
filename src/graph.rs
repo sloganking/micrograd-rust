@@ -1,28 +1,25 @@
 // this file is a different rendering implemenation than graph.rs.
 // This wil will use the graphviz-rust lib instead.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::vec;
-
 use crate::neural::SubgraphTreeNode;
 use crate::Value;
 use graphviz_rust::dot_generator::*;
-use graphviz_rust::dot_structures::GraphAttributes;
 use graphviz_rust::dot_structures::*;
 use graphviz_rust::{
     attributes::*,
     cmd::{CommandArg, Format},
-    exec, exec_dot, parse,
+    exec,
     printer::{DotPrinter, PrinterContext},
 };
-use petgraph::graph;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::vec;
 use uuid::Uuid;
 
 fn get_prevs_of_recursive(v: &Value, set: &mut HashSet<Value>) -> Vec<Value> {
     let mut values = vec![];
     for prev in v.borrow().prev.iter() {
-        if set.contains(&prev) {
+        if set.contains(prev) {
             continue;
         }
         set.insert(prev.clone());
@@ -222,7 +219,7 @@ fn get_subgraph_map(v: &Value) -> HashMap<Uuid, Vec<Value>> {
 }
 
 pub fn render_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Option<()> {
-    let graph = create_graph(&v, subgraph_tree);
+    let graph = create_graph(v, subgraph_tree);
 
     let text = graph.print(&mut PrinterContext::default());
     println!("===== text: =====\n{}", text);
