@@ -30,44 +30,12 @@ fn main() {
 
     println!("ys: {:?}", ys);
 
-    // generate vec of y predictions
-    let preds = xs
-        .iter()
-        .map(|x| mlp.forward(x.clone())[0].clone())
-        .collect::<Vec<_>>();
-
-    println!("ypreds: {:?}", preds);
-
-    // get the loss of the preds
-    let losses: Vec<Value> = preds
-        .iter()
-        .zip(ys.iter())
-        .map(|(pred, y)| (pred.clone() - y.clone()).pow(Value::from(2.0)))
-        .collect();
-
-    println!("losses: {:?}", losses);
-
-    let loss = losses.into_iter().sum::<Value>();
-
-    loss.backward();
-
-    println!("loss: {:?}", loss);
-
-    let out = loss;
-
     let params = mlp.parameters();
     println!("params: {:#?}", params);
     println!("num params: {:?}", params.len());
 
-    let step_size = 0.01;
-
-    for param in params {
-        println!("param: {:?}", param);
-        let grad = param.borrow().grad;
-        param.borrow_mut().data += step_size * -grad;
-    }
-
     // training cycle
+    let step_size = 0.01;
     for i in 0..100 {
         mlp.zero_grad();
 
