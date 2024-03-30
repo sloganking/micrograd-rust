@@ -84,10 +84,6 @@ fn render_subgraph_tree_recursive(
             subgraph_to_value_map,
             values_corresponding_op_node,
         );
-        // childrens_statments.push(stmt!(subgraph!(
-        //     "cluster".to_owned() + child_subgraph.subgraph_id.as_u128().to_string().as_str(),
-        //     this_child_statements
-        // )));
         childrens_statments.extend(this_child_statements)
     }
 
@@ -141,35 +137,6 @@ fn create_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Graph {
     let mut graph_statements = vec![];
 
     // create all nodes in all subgraphs
-    // let subgraphs = {
-    //     let mut subgraphs = vec![];
-    //     for (subgraph_id, subgraph_values) in subgraph_map.iter() {
-    //         let mut subgraph_statements = vec![];
-
-    //         // add all the nodes to the subgraph
-    //         for value in subgraph_values.iter() {
-    //             subgraph_statements.extend(value_to_statements(
-    //                 value,
-    //                 &mut values_corresponding_op_node,
-    //             ));
-    //         }
-
-    //         // add attributes to the subgraph
-    //         let attributes = vec![
-    //             attr!("label", "\"Neuron\""),
-    //             SubgraphAttributes::color(color_name::blue),
-    //             // SubgraphAttributes::bgcolor(color_name::red),
-    //         ];
-    //         let attributes_statements: Vec<Stmt> = attributes.into_iter().map(Stmt::from).collect();
-
-    //         subgraph_statements.extend(attributes_statements);
-
-    //         let subgraph_id = "cluster".to_owned() + subgraph_id.as_u128().to_string().as_str();
-    //         subgraphs.push(stmt!(subgraph!(subgraph_id, subgraph_statements)));
-    //     }
-    //     subgraphs
-    // };
-
     let subgraphs = render_subgraph_tree_recursive(
         &subgraph_tree,
         &subgraph_map,
@@ -255,14 +222,9 @@ fn get_subgraph_map(v: &Value) -> HashMap<Uuid, Vec<Value>> {
 }
 
 pub fn render_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Option<()> {
-    let dir = "test.dot";
-    // can be "png" or "svg".
-    let output_file_type = "png";
-
     let graph = create_graph(&v, subgraph_tree);
 
     let text = graph.print(&mut PrinterContext::default());
-
     println!("===== text: =====\n{}", text);
 
     // save to file
