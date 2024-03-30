@@ -272,7 +272,7 @@ pub fn render_graph(v: &Value, subgraph_tree: SubgraphTreeNode) -> Option<()> {
         &mut PrinterContext::default(),
         vec![
             Format::Png.into(),
-            CommandArg::Output("./graph2.png".to_string()),
+            CommandArg::Output("./graph.png".to_string()),
         ],
     )
     .unwrap();
