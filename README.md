@@ -33,4 +33,14 @@ graph::render_graph(&out, neuron.get_subgraph_tree().unwrap()).unwrap();
 ![neuron](https://github.com/sloganking/micrograd-rust/assets/16965931/4d6f70fb-33f4-436b-8a20-8abb7af7b278)
 
 ### A [4,4,1] layer MLP
-![mlp](https://github.com/sloganking/micrograd-rust/assets/16965931/9abbda78-ea58-488a-aea0-f686db012abc)
+```rust
+let x_inputs = vec![Value::from(1.0), Value::from(2.0), Value::from(3.0)];
+let y_target = Value::from(1.0);
+let mlp = neuron::MLP::new(x_inputs.len().try_into().unwrap(), vec![4, 4, 1]);
+let preds = mlp.forward(x_inputs);
+let pred = preds[0].clone();
+let loss = (pred.clone() - y_target.clone()).pow(Value::from(2.0));
+loss.backward();
+graph::render_graph(&loss, mlp.get_subgraph_tree().unwrap()).unwrap();
+```
+![mlp](https://github.com/sloganking/micrograd-rust/assets/16965931/a642e9e9-e304-4fae-aea1-1ef2392962b7)
