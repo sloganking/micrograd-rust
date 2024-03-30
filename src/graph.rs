@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::vec;
 
-use crate::neuron::SubgraphTreeNode;
+use crate::neural::SubgraphTreeNode;
 use crate::Value;
 use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::GraphAttributes;

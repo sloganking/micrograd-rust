@@ -1,5 +1,5 @@
 mod graph;
-mod neuron;
+mod neural;
 mod value;
 use crate::value::Value;
 
@@ -11,7 +11,7 @@ fn main() {
         // Value::from(4.0),
     ];
 
-    let mlp = neuron::MLP::new(inputs.len().try_into().unwrap(), vec![4, 4, 1]);
+    let mlp = neural::MLP::new(inputs.len().try_into().unwrap(), vec![4, 4, 1]);
 
     // create dataset
     let xs = vec![
