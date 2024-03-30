@@ -25,7 +25,7 @@ graph::render_graph(&d).unwrap()
 
 ```rust
 let inputs = vec![Value::from(1.0), Value::from(2.0), Value::from(3.0)];
-let neuron = neuron::Neuron::new(inputs.len().try_into().unwrap());
+let neuron = neural::Neuron::new(inputs.len().try_into().unwrap());
 let out = neuron.forward(inputs);
 out.backward();
 graph::render_graph(&out, neuron.get_subgraph_tree().unwrap()).unwrap();
@@ -36,7 +36,7 @@ graph::render_graph(&out, neuron.get_subgraph_tree().unwrap()).unwrap();
 ```rust
 let x_inputs = vec![Value::from(1.0), Value::from(2.0), Value::from(3.0)];
 let y_target = Value::from(1.0);
-let mlp = neuron::MLP::new(x_inputs.len().try_into().unwrap(), vec![4, 4, 1]);
+let mlp = neural::MLP::new(x_inputs.len().try_into().unwrap(), vec![4, 4, 1]);
 let preds = mlp.forward(x_inputs);
 let pred = preds[0].clone();
 let loss = (pred.clone() - y_target.clone()).pow(Value::from(2.0));
